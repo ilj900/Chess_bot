@@ -1,3 +1,9 @@
+#pragma once
 #include <iostream>
+#include <beast.hpp>
+#include 
 
-void tryLib();
+namespace WSCL
+{
+    void sendRequest();
+} // namespace WSCL

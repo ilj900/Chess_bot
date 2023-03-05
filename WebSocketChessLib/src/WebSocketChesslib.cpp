@@ -1,6 +1,9 @@
 #include "WebSocketChesslib.hpp"
 
-void tryLib()
+namespace WSCL
 {
-	std::cout << "WebSocketLib" << std::endl;
-}
+    void sendRequest()
+    {
+        std::cout << "WebSocketLib" << std::endl;
+    }
+} // namespace WSCL

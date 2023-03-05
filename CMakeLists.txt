@@ -16,3 +16,8 @@ set(INCLUDE
 		include/main.h)
 
 add_executable(${PROJECT_NAME} ${SOURCE} ${INCLUDE})
+
+include(setup_boost.cmake)
+
+add_subdirectory("WebSocketChessLib")
+add_subdirectory("WebSocketChessLib/test/server")
