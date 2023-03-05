@@ -1,14 +1,19 @@
 cmake_minimum_required(VERSION 3.13)
 project(WebSocketChessLib)
 
-file(GLOB SOURCES *.hpp *.cpp)
+file(GLOB_RECURSE SOURCES src/*.cpp)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
 
-find_program(CONAN conan)
-if(NOT ${CONAN})
-    message("Downloading conan")
-    execute_process(COMMAND pip install conan==1.54.0)
+if(WIN32)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
+
+execute_process(COMMAND conan --version RESULT_VARIABLE CONAN_NOT_FIND)
+if(CONAN_NOT_FIND)
+    message(STATUS "Downloading conan")
+    execute_process(COMMAND "pip install conan==1.54.0" "--use-pep517")
 endif()
 
 if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
@@ -20,24 +25,36 @@ endif()
 
 include(${CMAKE_BINARY_DIR}/conan.cmake)
 
-conan_cmake_run(
+# conan_cmake_run(
+#     REQUIRES
+#         boost/1.79.0
+
+#     BASIC_SETUP
+#     CMAKE_TARGETS
+#     BUILD_TYPE ${CMAKE_BUILD_TYPE}
+
+#     BUILD missing
+#     GENERATORS cmake_find_package)
+
+conan_cmake_configure(
     REQUIRES
         boost/1.79.0
+    GENERATORS
+        cmake_find_package
+)
 
-    BASIC_SETUP
-    CMAKE_TARGETS
-    BUILD_TYPE ${CMAKE_BUILD_TYPE}
-
+conan_cmake_install(
+    PATH_OR_REFERENCE .
     BUILD missing
-    GENERATORS cmake_find_package)
+    REMOTE conancenter
+)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+find_package(Boost REQUIRED COMPONENTS fiber)
 
-find_package(Boost REQUIRED COMPONENTS beast fiber)
+add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
-# target_link_libraries(${PROJECT_NAME} PUBLIC 
-#     Boost::beast,
-#     Boost::fiber
-# )
+target_include_directories(${PROJECT_NAME} PUBLIC ${Boost_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-add_library(WebSockeChesstLib ${SOURCES})
+target_link_libraries(${PROJECT_NAME} PUBLIC 
+    Boost::fiber
+)
